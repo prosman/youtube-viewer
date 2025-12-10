@@ -3,4 +3,5 @@ services:
   ytview:
     build:
       context: .
-    restart: unless-stopped
+    image: youtube-viewer-img
+    restart: always
