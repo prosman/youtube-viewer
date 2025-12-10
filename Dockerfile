@@ -1,35 +1,21 @@
-FROM alpine:edge
+FROM python:3.9-slim
 
-# Installs latest Chromium (77) package.
-RUN apk add --no-cache \
-      chromium \
-      nss \
-      freetype \
-      freetype-dev \
-      harfbuzz \
-      ca-certificates \
-      ttf-freefont \
-      nodejs \
-      npm \
-      tor
+# Gerekli araçları yükle
+RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-driver \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
-ENV NODE_ENV production
-ENV YOUTUBE_VIEWER_FORCE_DEBUG false
-
-# Create app directory
 WORKDIR /app
+COPY . .
 
-# Copy app artifacts and dependencies
-COPY ./core ./core 
-COPY ./handlers ./handlers
-COPY ./helpers ./helpers
-COPY ./services ./services
-COPY ./utils ./utils
-COPY ./index.js .
-COPY ./package.json .
-COPY ./urls.txt .
+# Kütüphaneleri yükle (requirements.txt dosyası olmadığı için elle yazıyoruz)
+RUN pip install --no-cache-dir selenium undetected-chromedriver fake-useragent requests
 
-RUN npm install
+# Ortam değişkenleri
+ENV PYTHONUNBUFFERED=1
+ENV CHROME_BIN=/usr/bin/chromium
+ENV CHROMEDRIVER=/usr/bin/chromedriver
 
-CMD ["node", "index" ,"--color=16m"]
+CMD ["python", "youtube_viewer.py"]
