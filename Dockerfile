@@ -1,56 +1,28 @@
 FROM node:18
 
-# Puppeteer ve Chrome'un çalışması için gereken TÜM sistem kütüphanelerini yükle
+# 1. Gerekli tüm kütüphaneleri ve Sanal Ekran (xvfb) aracını yükle
 RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libc6 \
-    libcairo2 \
-    libcups2 \
-    libdbus-1-3 \
-    libexpat1 \
-    libfontconfig1 \
-    libgbm1 \
-    libgcc1 \
-    libglib2.0-0 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libstdc++6 \
-    libx11-6 \
-    libx11-xcb1 \
-    libxcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libxss1 \
-    libxtst6 \
-    lsb-release \
     wget \
-    xdg-utils \
+    gnupg \
+    ca-certificates \
+    procps \
+    libxss1 \
+    xvfb \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libgtk-3-0 \
+    libgbm-dev \
+    libasound2 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Paket dosyalarını kopyala
+# 2. Paket dosyalarını kopyala ve kur
 COPY package*.json ./
-
-# Bağımlılıkları yükle
 RUN npm install
 
-# Tüm dosyaları kopyala
+# 3. Tüm proje dosyalarını kopyala
 COPY . .
 
-# Başlat
-CMD ["node", "index.js"]
+# 4. ÖNEMLİ: Uygulamayı "Sanal Ekran" (xvfb) içinde başlat
+CMD ["xvfb-run", "--auto-servernum", "--server-args='-screen 0 1280x1024x24'", "node", "index.js"]
